@@ -49,10 +49,15 @@ struct node_s{
     move_t move;
     state_t state;
     struct node_s* parent;
+		struct node_s* next;
 };
 
 typedef struct node_s node_t;
 
+typedef struct {
+	node_t *head;
+	node_t *foot;
+} list_t;
 /**
  * GLOBAL VARIABLES
 */
@@ -87,13 +92,33 @@ bool won(state_t *board);
 int num_pegs( state_t *board );
 
 /**
+ *Linked list fuctions to free allocated nodes
+ */
+
+ /* =====================================================================
+ 	 Linked list functions written by Alistair Moffat, as an example for the book
+ 	 "Programming, Problem Solving, and Abstraction with C", Pearson
+ 	 Custom Books, Sydney, Australia, 2002; revised edition 2012,
+ 	 ISBN 9781486010974.
+
+ 	 See http://people.eng.unimelb.edu.au/ammoffat/ppsaa/ for further
+ 	 information.
+
+ 	 Prepared December 2012 for the Revised Edition.
+ 	 ================================================================== */
+
+list_t *insert_at_head(list_t *list,node_t *node);
+list_t *make_empty_list(void);
+void free_list(list_t *list);
+
+/**
  * Used for human games
 */
 void rotateBoard(state_t *board);
 bool select_peg(state_t *board);
 bool moveUp(state_t *board);
-bool moveLeft(state_t *board); 
-bool moveDown(state_t *board); 
+bool moveLeft(state_t *board);
+bool moveDown(state_t *board);
 bool moveRight(state_t *board);
 int8_t validMovesUp(state_t *board);
 bool gameEndedForHuman(state_t *board);
@@ -107,6 +132,5 @@ void drawBoard(state_t *board);
 char* action_cstr(move_t move);
 void print_solution();
 void play_solution();
-
 
 #endif

@@ -1,11 +1,12 @@
 #include "utils.h"
 #include "layouts.h"
+#include <assert.h>
 
 void execute_move_t(state_t* state, position_s* selected_peg, move_t jump) {
     int8_t x = selected_peg->x;
     int8_t y = selected_peg->y;
 
-  
+
     switch (jump) {
     case up:          //Jump up
         state->field[x][y-2] = 'o';
@@ -38,7 +39,6 @@ void execute_move_t(state_t* state, position_s* selected_peg, move_t jump) {
         break;
 
     }
-
 }
 
 bool can_apply(state_t *board, position_s* selected_peg, move_t jump){
@@ -344,4 +344,48 @@ void play_solution(){
 			usleep(500000);
 		}
 	}
+}
+/* =====================================================================
+   Linked list functions written by Alistair Moffat, as an example for the book
+   "Programming, Problem Solving, and Abstraction with C", Pearson
+   Custom Books, Sydney, Australia, 2002; revised edition 2012,
+   ISBN 9781486010974.
+
+   See http://people.eng.unimelb.edu.au/ammoffat/ppsaa/ for further
+   information.
+
+   Prepared December 2012 for the Revised Edition.
+   ================================================================== */
+
+list_t *insert_at_head(list_t *list,node_t *node) {
+	node_t *new;
+	new = node;
+	new->next = list->head;
+	list->head = new;
+	if (list->foot==NULL) {
+		/* this is the first insertion into the list */
+		list->foot = new;
+	}
+
+	return list;
+}
+
+list_t *make_empty_list(void) {
+	list_t *list;
+	list = (list_t*)malloc(sizeof(*list));
+	assert(list!=NULL);
+	list->head = list->foot = NULL;
+	return list;
+}
+
+void free_list(list_t *list) {
+	node_t *curr, *prev;
+	assert(list!=NULL);
+	curr = list->head;
+	while (curr) {
+		prev = curr;
+		curr = curr->next;
+		free(prev);
+	}
+	free(list);
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
+#include <assert.h>
 
 #include "ai.h"
 #include "utils.h"
@@ -11,8 +12,8 @@
 #define POSSIBLE_MOVES 4
 
 
-void copy_state(state_t* dst, state_t* src){
 
+void copy_state(state_t* dst, state_t* src){
   //Copy field
   memcpy( dst->field, src->field, SIZE*SIZE*sizeof(int8_t) );
 
@@ -55,12 +56,15 @@ node_t* applyAction(node_t* n, position_s* selected_peg, move_t action ){
   node_t *new_node = create_init_node( &n->state );
 
   new_node->parent = n;
+
+
   new_node->move = action;
   new_node->depth = n->depth+1;
   new_node->state.cursor.x = selected_peg->x;
   new_node->state.cursor.y = selected_peg->y;
 
   execute_move_t( &(new_node->state), selected_peg, action );
+
   return new_node;
 }
 
@@ -71,7 +75,6 @@ node_t* applyAction(node_t* n, position_s* selected_peg, move_t action ){
 void find_solution( state_t* init_state  ){
   int rem = 0;
   HashTable table;
-  position_s *p = (position_s *) malloc(sizeof(position_s));
 
   // Choose initial capacity of PRIME NUMBER
   // Specify the size of the keys and values you want to store once
@@ -83,17 +86,26 @@ void find_solution( state_t* init_state  ){
   //Add the initial node
   node_t* n = create_init_node( init_state );
   node_t* newNode;
+  //list used to keep track of nodes
+  list_t *list;
+  //initialise list
+  list = make_empty_list();
+  //position of cursor
+  position_s *p = (position_s *) malloc(sizeof(position_s));
+
+
+
+  list = insert_at_head(list, n);
   stack_push(n);
 
   rem = num_pegs(&n->state);
+
   while(!is_stack_empty()){
     n = stack_top();
     stack_pop();
-
     expanded_nodes++;
 
     if( num_pegs(&n->state) <rem ){
-
       save_solution(n);
       rem = num_pegs(&n->state);
     }
@@ -103,17 +115,18 @@ void find_solution( state_t* init_state  ){
       for(int j=0;j<SIZE;j++){
         p->y = j;
         for(int k=0;k<POSSIBLE_MOVES;k++){
-
           if( can_apply(&n->state, p, k) ){
-
             newNode = applyAction(n, p, k);
+            list = insert_at_head(list, newNode);
             generated_nodes++;
+
             if(won(&newNode->state)){
               save_solution(newNode);
               rem = num_pegs(&newNode->state);
+              //free hash table
               ht_destroy(&table);
-              free(n);
-              free(newNode);
+              //free all nodes
+              free_list(list);
               free(p);
               return;
             }
@@ -124,15 +137,14 @@ void find_solution( state_t* init_state  ){
           }
         }
       }
-    }//valgrind --leak-check=full --show-leak-kinds=all ./pegsol 2 AI
+    }
     if(expanded_nodes >= budget){
+      //free hash table
       ht_destroy(&table);
-      free(n);
-      free(newNode);
+      //free all nodes
+      free_list(list);
       free(p);
-      free_stack();
       return;
     }
   }
-
 }

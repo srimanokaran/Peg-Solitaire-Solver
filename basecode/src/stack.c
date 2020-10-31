@@ -31,7 +31,7 @@ int is_stack_empty() {
 void print_stack() {
 	printf("Stack: ");
 	for(int i = 0;i<=stack_top_idx;i++){
-    
+
 		drawBoard( &(stack[i]->state) );
   }
 	printf("\n");
